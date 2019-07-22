@@ -11,6 +11,8 @@ CTIMEVAR=-X $(PKG)/version.GITCOMMIT=$(GITCOMMIT) -X $(PKG)/version.VERSION=$(VE
 GO_LDFLAGS=-ldflags "-w $(CTIMEVAR)"
 GO_LDFLAGS_STATIC=-ldflags "-w $(CTIMEVAR) -extldflags -static"
 
+GOOSARCHES = darwin/amd64 darwin/386 freebsd/amd64 freebsd/386 linux/arm linux/arm64 linux/amd64 linux/386 solaris/amd64 windows/amd64 windows/386
+
 GO := go
 
 all: clean build fmt lint staticcheck vet install
@@ -59,6 +61,18 @@ staticcheck: ## Verifies `staticcheck` passes.
 	@if [[ ! -z "$(staticcheck $(shell $(GO) list ./... | grep -v vendor) | tee /dev/stderr)" ]]; then \
 		exit 1; \
 	fi
+
+define buildrelease
+GOOS=$(1) GOARCH=$(2) CGO_ENABLED=0 $(GO) build \
+	 -o $(BUILDDIR)/$(NAME)-$(1)-$(2) \
+	 -a -tags "$(BUILDTAGS) static_build netgo" \
+	 -installsuffix netgo ${GO_LDFLAGS_STATIC} .;
+endef
+
+.PHONY: release
+release: *.go VERSION.txt ## Builds the cross-compiled binaries, naming them in such a way for release (eg. binary-GOOS-GOARCH)
+	@echo "+ $@"
+	$(foreach GOOSARCH,$(GOOSARCHES), $(call buildrelease,$(subst /,,$(dir $(GOOSARCH))),$(notdir $(GOOSARCH))))
 
 .PHONY: clean
 clean: ## Cleanup any build binaries or packages.
