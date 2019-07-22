@@ -6,8 +6,8 @@ PREFIX?=$(shell pwd)
 BUILDDIR := ${PREFIX}/cross
 
 VERSION := $(shell cat VERSION.txt)
-GIT_VERSION ?= $(shell git rev-parse HEAD)
-CTIMEVAR=-X $(PKG)/GITCOMMIT=$(GITCOMMIT) -X $(PKG)/VERSION=$(VERSION)
+GITCOMMIT ?= $(shell git rev-parse HEAD)
+CTIMEVAR=-X $(PKG)/version.GITCOMMIT=$(GITCOMMIT) -X $(PKG)/version.VERSION=$(VERSION)
 GO_LDFLAGS=-ldflags "-w $(CTIMEVAR)"
 GO_LDFLAGS_STATIC=-ldflags "-w $(CTIMEVAR) -extldflags -static"
 
