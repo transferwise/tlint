@@ -136,13 +136,13 @@ func processFile(path string) error {
 				continue
 			}
 
-			if strings.HasPrefix(kv[1], "'") || strings.HasSuffix(kv[1], "'") {
+			if strings.HasPrefix(kv[1], "'") && strings.HasSuffix(kv[1], "'") {
 				ec++
 				log.Println(aurora.Red(fmt.Sprintf("  [%s] Value is surrounded by single quotes on line %d", path, ln)))
 				continue
 			}
 
-			if strings.HasPrefix(kv[1], "\"") || strings.HasSuffix(kv[1], "\"") {
+			if strings.HasPrefix(kv[1], "\"") && strings.HasSuffix(kv[1], "\"") {
 				ec++
 				log.Println(aurora.Red(fmt.Sprintf("  [%s] Value is surrounded by double quotes on line %d", path, ln)))
 				continue
