@@ -112,6 +112,7 @@ func processFile(path string) error {
 	scanner := bufio.NewScanner(file)
 	ln := 0
 	ec := 0
+	dups := make(map[string]int)
 	for scanner.Scan() {
 		ln++
 		line := strings.TrimSpace(scanner.Text())
@@ -123,6 +124,13 @@ func processFile(path string) error {
 			}
 
 			kv := strings.Split(line, "=")
+			//Now that we have the key, put it in the counting array
+			_, ok := dups[kv[0]]
+			if ok {
+				dups[kv[0]] += 1
+			} else {
+				dups[kv[0]] = 0
+			}
 
 			if strings.HasSuffix(kv[0], " ") || strings.HasPrefix(kv[1], " ") {
 				ec++
@@ -147,6 +155,13 @@ func processFile(path string) error {
 				log.Println(aurora.Red(fmt.Sprintf("  [%s] Value is surrounded by double quotes on line %d", path, ln)))
 				continue
 			}
+		}
+	}
+
+	for k, v := range dups {
+		if v > 0 {
+			ec++
+			log.Println(aurora.Red(fmt.Sprintf("  [%s] Key '%s' has %d duplicates", path, k, v)))
 		}
 	}
 
