@@ -19,6 +19,10 @@ type rootCmd struct {
 	verbose bool
 }
 
+type propertiesCmd struct {
+	filename string
+}
+
 func main() {
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 	i := &rootCmd{}
@@ -45,18 +49,18 @@ func main() {
 }
 
 func newPropertiesLintCmd(r *rootCmd) *cobra.Command {
+	c := &propertiesCmd{}
 	propertiesLintCmd := &cobra.Command{
 		Use:   "properties",
 		Short: "Validate properties files",
 		Run: func(cmd *cobra.Command, args []string) {
-			filename := "."
-			info, err := os.Stat(filename)
+			info, err := os.Stat(c.filename)
 			if err != nil {
 				log.Fatal(err)
 			}
 			ec := 0
 			if info.IsDir() {
-				files, err := filePathWalkDir(filename)
+				files, err := filePathWalkDir(c.filename)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -77,6 +81,7 @@ func newPropertiesLintCmd(r *rootCmd) *cobra.Command {
 			}
 		},
 	}
+	propertiesLintCmd.PersistentFlags().StringVarP(&c.filename, "filename", "f", ".", "File name or directory")
 	return propertiesLintCmd
 }
 
